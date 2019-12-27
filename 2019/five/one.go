@@ -4,6 +4,7 @@ import (
     "fmt"
     "io/ioutil"
     "log"
+    "os"
     "strconv"
     "strings"
 )
@@ -18,7 +19,60 @@ type Instruction struct {
     parameters [][2]int
 }
 
-func (ins Instruction) Execute(program []int) {
+func (ins Instruction) Execute() (*Instruction) {
+    switch ins.opcode {
+    case 1:
+        ins.Store(3, ins.Fetch(1)+ins.Fetch(2))
+    case 2:
+        ins.Store(3, ins.Fetch(1)*ins.Fetch(2))
+    case 3:
+        var input int
+        fmt.Print("[<] ")
+        fmt.Scanf("%d", &input)
+
+        ins.Store(1, input)
+    case 4:
+        fmt.Printf("[>] (%03d) %d\n", ins.address, ins.Fetch(1))
+    case 99:
+        fmt.Printf("[=] %d\n", ins.memory[0])
+
+        os.Exit(0)
+    default:
+        log.Fatalf("Invalid opcode: %d\n", ins.opcode)
+    }
+
+    return NewInstruction(ins.memory, ins.address+ins.length+1)
+}
+
+func (ins Instruction) Fetch(index int) (int) {
+    if index > ins.length {
+        log.Fatalf("Invalid parameter fetch: %d\n", index);
+    }
+
+    parameter := index - 1
+    mode := ins.parameters[parameter][0]
+    value := ins.parameters[parameter][1]
+
+    if mode == 0 {
+        return ins.memory[value]
+    }
+
+    return value
+}
+
+func (ins Instruction) Store(index int, value int) {
+    if index > ins.length {
+        log.Fatalf("Invalid parameter fetch: %d\n", index);
+    }
+
+    parameter := index - 1
+    mode := ins.parameters[parameter][0]
+    if mode != 0 {
+        log.Fatalf("Illegal parameter mode for store instruction: %d\n", mode)
+    }
+
+    address := ins.parameters[parameter][1]
+    ins.memory[address] = value
 }
 
 func NewInstruction(program []int, address int) (*Instruction) {
@@ -26,89 +80,53 @@ func NewInstruction(program []int, address int) (*Instruction) {
     ins.address = address
     ins.memory = program
 
-    encoded := strconv.Itoa(program[counter])
+    encoded := fmt.Sprintf("%05d", program[address])
     encoded_length := len(encoded)
 
     var err error = nil
     ins.opcode, err = strconv.Atoi(encoded[encoded_length-2:])
     if err != nil { log.Fatal(err) }
 
-    if ins.opcode < 3 { ins.length = 3 }
-    else if ins.opcode < 99 { ins.length = 3 }
+    if ins.opcode < 3 {
+        ins.length = 3
+    } else if ins.opcode < 99 {
+        ins.length = 1
+    }
 
     modes := make([]int, ins.length, ins.length)
-    for i := encoded_length - 3; i >= 0; i-- {
+    for i := encoded_length-3; i > encoded_length-ins.length-3; i-- {
         modes[encoded_length-3-i] = int(encoded[i] - 0x30)
     }
 
-    ins.paramters = make([][2]int, ins.length, ins.length)
+    ins.parameters = make([][2]int, ins.length, ins.length)
     for i, mode := range modes {
         ins.parameters[i][0] = mode
-        ins.parameters[i][1] = program[counter+1+i]
+        ins.parameters[i][1] = program[address+1+i]
     }
 
     return ins
 }
 
 
-func execute(program []int) (int) {
-    counter := 0
-
-    for {
-        switch program[counter] {
-        case 1:
-            lval := program[program[counter+1]]
-            rval := program[program[counter+2]]
-            program[program[counter+3]] = lval + rval
-            counter += 4
-        case 2:
-            lval := program[program[counter+1]]
-            rval := program[program[counter+2]]
-            program[program[counter+3]] = lval * rval
-            counter += 4
-        case 3:
-            var val int
-            fmt.Print("[>] ")
-            fmt.Scanf("%d", &val)
-
-            program[program[counter+1]] = val
-            counter += 2
-        case 4:
-            val := program[program[counter+1]]
-            counter += 2
-
-            fmt.Printf("[%d] %d\n", counter, val)
-        case 99:
-            return program[0]
-        default:
-            log.Fatalf("Invalid opcode: %d\n", program[counter])
-        }
-    }
-
-    return -1
-}
-
-
-
 func main() {
     data, err := ioutil.ReadFile("input.txt")
     if err != nil { log.Fatal(err) }
 
-    instructions := strings.Split(strings.TrimSpace(string(data)), ",")
-    program := make([]int, len(instructions))
+    tokens := strings.Split(strings.TrimSpace(string(data)), ",")
+    program := make([]int, len(tokens))
 
-    for i := range instructions {
-        instruction, err := strconv.Atoi(instructions[i])
+    for i, token := range tokens {
+        value, err := strconv.Atoi(token)
         if err != nil {
-            log.Fatalf("invalid instruction at index: %d=%s\n",
-                i, instructions[i])
+            log.Fatalf("invalid token at index: %d=%s\n", i, token[i])
         }
 
-        program[i] = instruction
+        program[i] = value
     }
 
-    result := execute(program)
-
-    fmt.Printf("The value at position 0 is: %d\n", result)
+    instruction := NewInstruction(program, 0)
+    for {
+        instruction = instruction.Execute()
+    }
 }
 
