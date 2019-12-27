@@ -20,6 +20,8 @@ type Instruction struct {
 }
 
 func (ins Instruction) Execute() (*Instruction) {
+    pc := ins.address + ins.length + 1
+
     switch ins.opcode {
     case 1:
         ins.Store(3, ins.Fetch(1)+ins.Fetch(2))
@@ -33,6 +35,28 @@ func (ins Instruction) Execute() (*Instruction) {
         ins.Store(1, input)
     case 4:
         fmt.Printf("[>] (%03d) %d\n", ins.address, ins.Fetch(1))
+    case 5:
+        if ins.Fetch(1) != 0 {
+            pc = ins.Fetch(2)
+        }
+    case 6:
+        if ins.Fetch(1) == 0 {
+            pc = ins.Fetch(2)
+        }
+    case 7:
+        value := 0
+        if ins.Fetch(1) < ins.Fetch(2) {
+            value = 1
+        }
+
+        ins.Store(3, value)
+    case 8:
+        value := 0
+        if ins.Fetch(1) == ins.Fetch(2) {
+            value = 1
+        }
+
+        ins.Store(3, value)
     case 99:
         fmt.Printf("[=] %d\n", ins.memory[0])
 
@@ -41,7 +65,7 @@ func (ins Instruction) Execute() (*Instruction) {
         log.Fatalf("Invalid opcode: %d\n", ins.opcode)
     }
 
-    return NewInstruction(ins.memory, ins.address+ins.length+1)
+    return NewInstruction(ins.memory, pc)
 }
 
 func (ins Instruction) Fetch(index int) (int) {
@@ -89,8 +113,12 @@ func NewInstruction(program []int, address int) (*Instruction) {
 
     if ins.opcode < 3 {
         ins.length = 3
-    } else if ins.opcode < 99 {
+    } else if ins.opcode < 5 {
         ins.length = 1
+    } else  if ins.opcode < 7 {
+        ins.length = 2
+    } else if ins.opcode < 99 {
+        ins.length = 3
     }
 
     modes := make([]int, ins.length, ins.length)
