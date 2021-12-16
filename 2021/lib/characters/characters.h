@@ -30,7 +30,7 @@ string_push(struct string *s, char c);
 
 
 enum aoc_error
-string_into_number(char *string, long int *number);
+string_into_number(char *string, long int *number, int base);
 
 #endif
 

@@ -18,7 +18,13 @@ void
 array_clear(struct array *a, void (*function)(void *));
 
 struct array *
+array_copy(struct array *a);
+
+struct array *
 array_create(size_t capacity);
+
+enum aoc_error
+array_delete(struct array *a, size_t index);
 
 struct array *
 array_destroy(struct array *a, void (*function)(void *));

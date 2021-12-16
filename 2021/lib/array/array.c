@@ -46,6 +46,24 @@ array_clear(struct array *a, void (*function)(void *)) {
 }
 
 struct array *
+array_copy(struct array *a) {
+    if (!(a && a->items && a->length)) { return NULL; }
+
+    struct array *b = array_create(a->length);
+    if (!b) { return NULL; }
+
+    for (size_t i = 0; i < a->length; ++i) {
+        if (array_push(b, a->items[i]) != AOC_E_OK) {
+            b = array_destroy(b, NULL);
+
+            break;
+        }
+    }
+
+    return b;
+}
+
+struct array *
 array_create(size_t capacity) {
     if (!capacity) { return NULL; }
 
@@ -64,12 +82,31 @@ array_create(size_t capacity) {
     return a;
 }
 
+enum aoc_error
+array_delete(struct array *a, size_t index) {
+    if (!(a && a->items && a->length)) { return AOC_E_ARGUMENT_INVALID; }
+    if (index >= a->length) { return AOC_E_ARGUMENT_INVALID; }
+
+    if (index != a->capacity - 1) {
+        for (size_t i = index + 1; i < a->length; ++i) {
+            a->items[i - 1] = a->items[i];
+        }
+    }
+
+    a->items[--a->length] = NULL;
+
+    return AOC_E_OK;
+}
+
 struct array *
 array_destroy(struct array *a, void (*function)(void *)) {
     if (!a) { return NULL; }
 
     if (a->items) {
-        array_clear(a, function);
+        if (function) {
+            array_clear(a, function);
+        }
+
         free(a->items);
     }
 

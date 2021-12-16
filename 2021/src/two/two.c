@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -24,12 +25,10 @@ position_calculate(struct array *lines, bool aiming) {
     long int position = 0;
 
     for (size_t i = 0; i < lines->length; ++i) {
-        struct string *line = lines->items[i];
-        if (line->empty) { continue; }
-
         long int *axis = NULL;
         long int direction = 0;
         long int distance = 0;
+        struct string *line = lines->items[i];
         size_t offset = 0;
 
         if (!strncmp(line->value, "down ", COMMAND_DOWN)) {
@@ -49,7 +48,7 @@ position_calculate(struct array *lines, bool aiming) {
         }
 
         enum aoc_error result = string_into_number(
-            line->value + offset, &distance);
+            line->value + offset, &distance, 10);
         if (result != AOC_E_OK) { return result; }
 
         if (aiming) {
@@ -80,7 +79,7 @@ main(int argc, char *argv[]) {
         return rc;
     }
 
-    struct array *lines = file_into_lines(argv[1]);
+    struct array *lines = file_into_lines(argv[1], true);
     if (!lines) { return error_handle(AOC_E_ERROR); }
 
     enum aoc_error result = AOC_E_OK;

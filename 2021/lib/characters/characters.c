@@ -87,11 +87,14 @@ string_push(struct string *s, char c) {
 
 
 enum aoc_error
-string_into_number(char *string, long int *number) {
+string_into_number(char *string, long int *number, int base) {
     if (!(string && strlen(string))) { return AOC_E_ARGUMENT_INVALID; }
+    if (base != 0 && (base < 2 || base > 36)) {
+        return AOC_E_ARGUMENT_INVALID;
+    }
 
     char *endptr = NULL;
-    long int result = strtol(string, &endptr, 10);
+    long int result = strtol(string, &endptr, base);
 
     if (errno == ERANGE) {
         if (result == LONG_MAX) { return AOC_E_OVERFLOW; }

@@ -12,7 +12,7 @@
 
 
 struct array *
-file_into_lines(const char *path) {
+file_into_lines(const char *path, bool ignore_empty) {
     if (!path) { return NULL; }
 
     FILE *fd = fopen(path, "r");
@@ -34,7 +34,11 @@ file_into_lines(const char *path) {
             }
         }
 
-        if (array_push(a, s) != AOC_E_OK) { goto exit_array_push; }
+        if (ignore_empty && s->empty) {
+            s = string_destroy(s);
+        }
+
+        if (s && array_push(a, s) != AOC_E_OK) { goto exit_array_push; }
         if (character == EOF) { goto exit; }
     }
 

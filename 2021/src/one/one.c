@@ -1,4 +1,5 @@
 #include <limits.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 #include "array.h"
@@ -20,13 +21,11 @@ increment_count(struct array *lines, size_t window) {
         long int x, y = 0;
 
         line = lines->items[i];
-        if (line->empty) { continue; }
-        result = string_into_number(line->value, &y);
+        result = string_into_number(line->value, &y, 10);
         if (result != AOC_E_OK) { return result; }
 
         line = lines->items[i - window];
-        if (line->empty) { continue; }
-        result = string_into_number(line->value, &x);
+        result = string_into_number(line->value, &x, 10);
         if (result != AOC_E_OK) { return result; }
 
         if (y > x) { ++count; }
@@ -48,7 +47,7 @@ main(int argc, char *argv[]) {
         return rc;
     }
 
-    struct array *lines = file_into_lines(argv[1]);
+    struct array *lines = file_into_lines(argv[1], true);
     if (!lines) { return error_handle(AOC_E_ERROR); }
 
     enum aoc_error result = AOC_E_OK;
