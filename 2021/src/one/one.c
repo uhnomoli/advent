@@ -20,11 +20,11 @@ increment_count(struct array *lines, size_t window) {
         enum aoc_error result = AOC_E_OK;
         long int x, y = 0;
 
-        line = lines->items[i];
+        line = lines->data.pt[i];
         result = string_into_number(line->value, &y, 10);
         if (result != AOC_E_OK) { return result; }
 
-        line = lines->items[i - window];
+        line = lines->data.pt[i - window];
         result = string_into_number(line->value, &x, 10);
         if (result != AOC_E_OK) { return result; }
 

@@ -17,7 +17,7 @@ bit_frequency(struct array *numbers, size_t number_width) {
     if (!bits) { return NULL; }
 
     for (size_t i = 0; i < numbers->length; ++i) {
-        struct string *number = numbers->items[i];
+        struct string *number = numbers->data.pt[i];
         if (number->length != number_width) {
             free(bits);
 
@@ -39,7 +39,7 @@ numbers_filter(struct array *numbers, bool most) {
     if (!(numbers && numbers->items)) { return AOC_E_ARGUMENT_INVALID; }
     if (!numbers->length) { return AOC_E_ARGUMENT_INVALID; }
 
-    size_t number_width = ((struct string *) numbers->items[0])->length;
+    size_t number_width = ((struct string *) numbers->data.pt[0])->length;
     enum aoc_error result = AOC_E_OK;
 
     unsigned int *bits = bit_frequency(numbers, number_width);
@@ -59,7 +59,7 @@ numbers_filter(struct array *numbers, bool most) {
         }
 
         for (size_t j = 0; j < numbers->length; ++j) {
-            struct string *number = numbers->items[j];
+            struct string *number = numbers->data.pt[j];
             if (number->length != number_width) {
                 result = AOC_E_ARGUMENT_INVALID;
 
@@ -106,14 +106,14 @@ life_support(struct array *lines) {
     if (result != AOC_E_OK) { goto exit; }
     long int co2_rating = 0;
     result = string_into_number(
-        ((struct string *) co2->items[0])->value, &co2_rating, 2);
+        ((struct string *) co2->data.pt[0])->value, &co2_rating, 2);
     if (result != AOC_E_OK) { goto exit; }
 
     result = numbers_filter(o2, true);
     if (result != AOC_E_OK) { goto exit; }
     long int o2_rating = 0;
     result = string_into_number(
-        ((struct string *) o2->items[0])->value, &o2_rating, 2);
+        ((struct string *) o2->data.pt[0])->value, &o2_rating, 2);
     if (result != AOC_E_OK) { goto exit; }
 
     printf("[.] life support rating (co2, o2): %ld (%ld, %ld)\n",
@@ -131,7 +131,7 @@ power_consumption(struct array *numbers) {
     if (!(numbers && numbers->items)) { return AOC_E_ARGUMENT_INVALID; }
     if (!numbers->length) { return AOC_E_ARGUMENT_INVALID; }
 
-    size_t number_width = ((struct string *) numbers->items[0])->length;
+    size_t number_width = ((struct string *) numbers->data.pt[0])->length;
 
     unsigned int *bits = bit_frequency(numbers, number_width);
     if (!bits) { return AOC_E_ARGUMENT_INVALID; }

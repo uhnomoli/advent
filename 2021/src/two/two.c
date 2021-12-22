@@ -28,7 +28,7 @@ position_calculate(struct array *lines, bool aiming) {
         long int *axis = NULL;
         long int direction = 0;
         long int distance = 0;
-        struct string *line = lines->items[i];
+        struct string *line = lines->data.pt[i];
         size_t offset = 0;
 
         if (!strncmp(line->value, "down ", COMMAND_DOWN)) {

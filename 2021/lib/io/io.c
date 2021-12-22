@@ -18,7 +18,7 @@ file_into_lines(const char *path, bool ignore_empty) {
     FILE *fd = fopen(path, "r");
     if (!fd) { return NULL; }
 
-    struct array *a = array_create(SIZE_ARRAY);
+    struct array *a = array_create(SIZE_ARRAY, ARRAY_PT_T);
     if (!a) { goto exit; }
 
     struct string *s = NULL;
@@ -38,7 +38,8 @@ file_into_lines(const char *path, bool ignore_empty) {
             s = string_destroy(s);
         }
 
-        if (s && array_push(a, s) != AOC_E_OK) { goto exit_array_push; }
+        union array_data data = { .pt = s};
+        if (s && array_push(a, data) != AOC_E_OK) { goto exit_array_push; }
         if (character == EOF) { goto exit; }
     }
 

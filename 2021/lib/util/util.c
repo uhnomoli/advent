@@ -18,7 +18,6 @@ error_handle(enum aoc_error error) {
 
             return EX_OSERR;
         case AOC_E_ARGUMENT_INVALID:
-        case AOC_E_ARGUMENT_NULL:
             return EX_DATAERR;
         case AOC_E_OK:
             return EX_OK;

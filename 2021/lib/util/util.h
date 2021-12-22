@@ -8,7 +8,6 @@ enum aoc_error {
     AOC_E_USAGE,
 
     AOC_E_ARGUMENT_INVALID,
-    AOC_E_ARGUMENT_NULL,
 
     AOC_E_FATAL,
     AOC_E_ALLOC,
