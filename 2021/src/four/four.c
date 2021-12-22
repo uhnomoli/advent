@@ -86,6 +86,14 @@ board_free(void *p) {
     free(b);
 }
 
+void
+board_reset(union array_data data) {
+    struct board *board = data.pt;
+    if (!board) { return; }
+
+    board->bitboard = 0;
+}
+
 
 struct array *
 boards_parse(struct array *lines) {
@@ -174,9 +182,83 @@ drawings_parse(struct string *line) {
     return drawings;
 }
 
+enum aoc_error
+bingo_winner(struct array *drawings, struct array *boards, size_t position) {
+    if (
+            !(drawings
+                && drawings->items
+                && drawings->length
+                && boards
+                && boards->items
+                && boards->length)
+            || position < 1
+            || position > boards->length) {
+        return AOC_E_ARGUMENT_INVALID;
+    }
+
+    boards = array_copy(boards);
+    if (!boards) { return AOC_E_ALLOC; }
+
+    enum aoc_error result = array_map(boards, board_reset);
+    if (result != AOC_E_OK) { goto exit; }
+
+    position = boards->length - position + 1;
+
+    for (size_t i = 0; i < drawings->length; ++i) {
+        for (size_t j = 0; j < boards->length; ++j) {
+            struct board *board = boards->data.pt[j];
+            for (size_t k = 0; k < board->numbers->length; ++k) {
+                if (board->numbers->data.ld[k] == drawings->data.ld[i]) {
+                    board->bitboard ^= 1 << k;
+
+                    break;
+                }
+            }
+
+            long int score = board_check(board);
+            if (score > 0) {
+                if (position == boards->length) {
+                    long int number_called = drawings->data.ld[i];
+
+                    printf("[.] winner: %zd\n", position);
+                    printf("[.]  d[%02zd]: %ld\n", i, number_called);
+
+                    for (size_t l = 0; l < board->numbers->length; l += 5) {
+                        if (l) {
+                            printf("[.]        ");
+                        } else {
+                            printf("[.]  board:");
+                        }
+
+                        for (size_t m = l; m < l + 5; ++m) {
+                            printf(" %2ld", board->numbers->data.ld[m]);
+                        }
+
+                        puts("");
+                    }
+
+                    printf("[.]  score: %ld * %ld = %ld\n",
+                        score, number_called, score * number_called);
+
+                    goto exit;
+                } else {
+                    result = array_delete(boards, j--);
+                    if (result != AOC_E_OK) {
+                        goto exit;
+                    }
+                }
+            }
+        }
+    }
+
+exit:
+    array_destroy(boards, NULL);
+
+    return result;
+}
 
 enum aoc_error
-bingo_score(struct array *lines) {
+bingo_simulate(struct array *lines) {
     if (!(lines && lines->items)) { return AOC_E_ARGUMENT_INVALID; }
     if (!lines->length) { return AOC_E_ARGUMENT_INVALID; }
 
@@ -199,45 +281,10 @@ bingo_score(struct array *lines) {
         goto exit_boards;
     }
 
-    for (size_t i = 0; i < drawings->length; ++i) {
-        for (size_t j = 0; j < boards->length; ++j) {
-            struct board *board = boards->data.pt[j];
-            for (size_t k = 0; k < board->numbers->length; ++k) {
-                if (board->numbers->data.ld[k] == drawings->data.ld[i]) {
-                    board->bitboard ^= 1 << k;
+    result = bingo_winner(drawings, boards, 1);
+    if (result != AOC_E_OK) { goto exit; }
 
-                    break;
-                }
-            }
-
-            long int score = board_check(board);
-            if (score > 0) {
-                long int number_called = drawings->data.ld[i];
-
-                puts("[.] winner:");
-                printf("[.]  d[%02zd]: %ld\n", i, number_called);
-
-                for (size_t l = 0; l < board->numbers->length; l += 5) {
-                    if (l) {
-                        printf("[.]        ");
-                    } else {
-                        printf("[.]  b[%02zd]:", j);
-                    }
-
-                    for (size_t m = l; m < l + 5; ++m) {
-                        printf(" %2ld", board->numbers->data.ld[m]);
-                    }
-
-                    puts("");
-                }
-
-                printf("[.]  score: %ld * %ld = %ld\n",
-                    score, number_called, score * number_called);
-
-                goto exit;
-            }
-        }
-    }
+    result = bingo_winner(drawings, boards, boards->length);
 
 exit:
     array_destroy(boards, board_free);
@@ -263,7 +310,7 @@ main(int argc, char *argv[]) {
     struct array *lines = file_into_lines(argv[1], true);
     if (!lines) { return error_handle(AOC_E_ERROR); }
 
-    enum aoc_error result = bingo_score(lines);
+    enum aoc_error result = bingo_simulate(lines);
 
     array_destroy(lines, string_free);
 
