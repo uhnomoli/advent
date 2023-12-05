@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "bun-types": "latest",
+    "typescript": "^5.3.2"
+  },
+  "module": "solve.ts",
+  "name": "advent-of-code-2023",
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "check": "tsc"
+  },
+  "type": "module"
+}
+
