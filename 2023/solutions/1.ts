@@ -58,6 +58,8 @@ function second(data: string): void {
 
 export function run(part: number, input: string): void {
     Bun.file(input).text().then(data => {
+        data = data.trim();
+
         if (part === 1) {
             first(data);
         } else {
