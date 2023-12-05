@@ -118,9 +118,9 @@ function second(data: string): void {
         parts.push([]);
 
         const line = lines[row];
-        for (const match of line.matchAll(/(\*|\d+)/g)) {
+        for (const match of line.matchAll(/(?:\*|\d+)/g)) {
             const column = match.index;
-            const size = match[1].length;
+            const size = match[0].length;
 
             // quiet the compiler due to a bug in TypeScript, see:
             // https://github.com/microsoft/TypeScript/issues/36788
@@ -134,13 +134,13 @@ function second(data: string): void {
                 y1: Math.max(row - 1, 0),
                 y2: Math.min(row + 1, height - 1)};
 
-            if (match[1] === '*') {
+            if (match[0] === '*') {
                 gears.push({
                     coordinates: coordinates});
             } else {
                 parts[row].push({
                     coordinates: coordinates,
-                    number: parseInt(match[1], 10)});
+                    number: parseInt(match[0], 10)});
             }
         }
     }
