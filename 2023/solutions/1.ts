@@ -1,6 +1,6 @@
 function first(data: string): void {
     let result = 0;
-    data.split('\n').forEach(line => {
+    for (const line of data.split('\n')) {
         let first = 0;
         let last = 0;
 
@@ -15,7 +15,7 @@ function first(data: string): void {
         }
 
         result += first + last;
-    });
+    }
 
     console.log(`[.] Solution: ${result}`);
 }
@@ -35,7 +35,7 @@ function second(data: string): void {
         '8': 8, 'eight': 8,
         '9': 9, 'nine': 9};
 
-    data.split('\n').forEach(line => {
+    for (const line of data.split('\n')) {
         let first = 0;
         let last = 0;
         let match = null;
@@ -50,7 +50,7 @@ function second(data: string): void {
         }
 
         result += first + last;
-    });
+    }
 
     console.log(`[.] Solution: ${result}`);
 }
