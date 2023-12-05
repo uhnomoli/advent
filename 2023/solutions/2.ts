@@ -1,5 +1,5 @@
-function game_validate(input: string): boolean {
-    for (const match of input.matchAll(/(\d+) (blue|green|red)/g)) {
+function game_validate(pulls: string): boolean {
+    for (const match of pulls.matchAll(/(\d+) (blue|green|red)/g)) {
         const n = parseInt(match[1], 10);
         const color = match[2];
 
@@ -15,9 +15,9 @@ function game_validate(input: string): boolean {
 function first(data: string): void {
     let result = 0;
     for (const line of data.split('\n')) {
-        const [game, input] = line.split(': ', 2);
+        const [game, pulls] = line.split(': ', 2);
 
-        if (game_validate(input)) {
+        if (game_validate(pulls)) {
             result += parseInt(game.split(' ')[1], 10);
         }
     }
@@ -28,13 +28,13 @@ function first(data: string): void {
 function second(data: string): void {
     let result = 0;
     for (const line of data.split('\n')) {
-        const [game, input] = line.split(': ', 2);
+        const [game, pulls] = line.split(': ', 2);
         const dice: Record<string, number> = {
             'blue': 0,
             'green': 0,
             'red': 0};
 
-        for (const pull of input.split('; ')) {
+        for (const pull of pulls.split('; ')) {
             for (const match of pull.matchAll(/(\d+) (blue|green|red)/g)) {
                 const n = parseInt(match[1], 10);
                 const color = match[2];
