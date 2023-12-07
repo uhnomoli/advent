@@ -16,10 +16,10 @@ interface Part {
 
 
 function gear_ratio(gear: Gear, parts: Part[][]): number {
-    let result: Part[] = [];
+    const result: Part[] = [];
 
-    for (let i = gear.coordinates.y1; i <= gear.coordinates.y2; i++) {
-        for (const part of parts[i]) {
+    for (let row = gear.coordinates.y1; row <= gear.coordinates.y2; row++) {
+        for (const part of parts[row]) {
             const gx1 = gear.coordinates.x1;
             const gx2 = gear.coordinates.x2;
             const px1 = part.coordinates.x1 + 1; // adjust to get occupied
@@ -42,10 +42,10 @@ function gear_ratio(gear: Gear, parts: Part[][]): number {
     return 0;
 }
 
-function is_part(lines: string[], coordinates: Coordinates): boolean {
-    for (let i = coordinates.y1; i <= coordinates.y2; i++) {
-        for (let j = coordinates.x1; j <= coordinates.x2; j++) {
-            if (is_symbol(lines[i].charCodeAt(j))) {
+function is_part(rows: string[], coordinates: Coordinates): boolean {
+    for (let row = coordinates.y1; row <= coordinates.y2; row++) {
+        for (let column = coordinates.x1; column <= coordinates.x2; column++) {
+            if (is_symbol(rows[row].charCodeAt(column))) {
                 return true;
             }
         }
