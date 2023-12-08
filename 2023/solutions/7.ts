@@ -80,7 +80,7 @@ function hand_sort(a: Hand, b: Hand): number {
     if (a.type !== b.type) { return a.type - b.type; }
 
     for (let i = 0; i < a.cards.length; i++) {
-        if (a.cards[i] == b.cards[i]) { continue; }
+        if (a.cards[i] === b.cards[i]) { continue; }
 
         return a.cards[i] - b.cards[i];
     }
