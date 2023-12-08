@@ -60,7 +60,7 @@ function cards_parse(data: string, ruleset: RuleSet): number[] {
                 break;
             default:
                 throw new Error(
-                    `Invalid card: ${character}: must be: 2-9, T, Q, K, A`);
+                    `Invalid card: ${character}: must be: 2-9, T, J, Q, K, A`);
         }
     }
 
