@@ -122,7 +122,7 @@ function hand_type(cards: string, ruleset: RuleSet): HandType {
         }
     }
 
-    if ((match = sorted.match(re_three_kind)) !== null) {
+    if (re_three_kind.test(sorted)) {
         switch (jokers) {
             case 1:
             case 3:
@@ -132,7 +132,7 @@ function hand_type(cards: string, ruleset: RuleSet): HandType {
         }
     }
 
-    if ((match = sorted.match(re_one_pair)) !== null) {
+    if (re_one_pair.test(sorted)) {
         switch (jokers) {
             case 1:
             case 2:
