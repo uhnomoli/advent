@@ -21,12 +21,12 @@ interface Seed {
 }
 
 
-function almanac_parse(data: string): Almanac {
+function almanac_parse(data: string, mode: string): Almanac {
     const [header, ...body] = data.split('\n\n');
 
     return {
         maps: body.map(map => map_parse(map)),
-        seeds: seeds_parse(header)};
+        seeds: seeds_parse(header, mode)};
 }
 
 function map_parse(data: string): Map {
@@ -53,94 +53,104 @@ function range_parse(data: string): MapRange {
         source: source};
 }
 
-function seeds_parse(data: string): Seed[] {
+function seeds_parse(data: string, mode: string): Seed[] {
+    const numbers = data.split(': ')[1];
     const seeds: Seed[] = [];
-    for (const match of data.split(': ')[1].matchAll(/\d+ \d+/g)) {
-        const [source, size] = match[0].split(' ')
-            .map(number => parseInt(number, 10));
 
-        seeds.push({
-            size: size,
-            source: source});
+    switch (mode) {
+        case 'range':
+            for (const match of numbers.matchAll(/\d+ \d+/g)) {
+                const [source, size] = match[0].split(' ')
+                    .map(number => parseInt(number, 10));
+
+                seeds.push({
+                    size: size,
+                    source: source});
+            }
+
+            break;
+        case 'single':
+            seeds.push(...numbers.split(' ')
+                .map(number => ({size: 1, source: parseInt(number, 10)})));
+
+            break;
+        default:
+            throw new Error(
+                `Invalid seed parse mode: ${mode}: must be: range, seed`);
     }
 
     return seeds;
 }
 
-
-function first(data: string): void {
-    const almanac = almanac_parse(data);
-    let result = 0;
-
-    for (const seed of almanac.seeds) {
-        let location = seed.source;
-        for (const map of almanac.maps) {
+function seed_to_location(seed: Seed, maps: Map[]): Seed[] {
+    const locations: Seed[] = [seed];
+    for (const map of maps) {
+        for (const location of locations) {
             for (const range of map.ranges) {
-                if (location >= range.source
-                        && location < range.source + range.size) {
-                    location = range.destination + (location - range.source);
+                if (location.source >= range.source
+                        && location.source < range.source + range.size) {
+                    const location_end = location.source + location.size;
+                    const range_end = range.source + range.size;
+
+                    if (location_end > range_end) {
+                        const size_contained = range_end - location.source;
+
+                        locations.push({
+                            size: location.size - size_contained,
+                            source: range_end});
+                        location.size = size_contained;
+                    }
+
+                    location.source = range.destination + (
+                        location.source - range.source);
 
                     break;
                 }
 
-                if (location < range.source) { break; }
+                if (location.source < range.source) {
+                    const location_end = location.source + location.size;
+                    if (location_end > range.source) {
+                        locations.push({
+                            size: location_end - range.source,
+                            source: range.source});
+                        location.size = range.source - location.source;
+                    }
+
+                    break;
+                }
             }
         }
+    }
 
-        result = result === 0 ? location : Math.min(result, location);
+    return locations;
+}
+
+
+function first(data: string): void {
+    const almanac = almanac_parse(data, 'single');
+    let result = -1;
+
+    for (const seed of almanac.seeds) {
+        result = seed_to_location(seed, almanac.maps)
+            .reduce((accumulator, value, index) => {
+                return accumulator === -1 ?
+                    value.source : Math.min(accumulator, value.source);
+            }, result);
     }
 
     console.log(`[.] Solution: ${result}`);
 }
 
 function second(data: string): void {
-    const almanac = almanac_parse(data);
+    const almanac = almanac_parse(data, 'range');
     let result = -1;
 
     for (const seed of almanac.seeds) {
-        const locations: Seed[] = [seed];
-        for (const map of almanac.maps) {
-            for (const location of locations) {
-                for (const range of map.ranges) {
-                    if (location.source >= range.source
-                            && location.source < range.source + range.size) {
-                        if (location.source + location.size
-                                > range.source + range.size) {
-                            const source_outside = range.source + range.size;
-                            const size_inside = (
-                                source_outside - location.source);
-
-                            locations.push({
-                                size: location.size - size_inside,
-                                source: source_outside});
-                            location.size = size_inside;
-                        }
-
-                        location.source = range.destination + (
-                            location.source - range.source);
-
-                        break;
-                    }
-
-                    if (location.source < range.source) {
-                        if (location.source + location.size > range.source) {
-                            locations.push({
-                                size: (location.source + location.size) - (
-                                    range.source),
-                                source: range.source});
-                            location.size = range.source - location.source;
-                        }
-
-                        break;
-                    }
-                }
-            }
-        }
-
-        result = locations.reduce((accumulator, value, index) => {
-            return accumulator === -1 ?
-                value.source : Math.min(accumulator, value.source);
-        }, result);
+        result = seed_to_location(seed, almanac.maps)
+            .reduce((accumulator, value, index) => {
+                return accumulator === -1 ?
+                    value.source : Math.min(accumulator, value.source);
+            }, result);
     }
 
     console.log(`[.] Solution: ${result}`);
