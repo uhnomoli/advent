@@ -87,7 +87,7 @@ function first(data: string): void {
             // quiet the compiler due to a bug in TypeScript, see:
             // https://github.com/microsoft/TypeScript/issues/36788
             if (typeof column !== 'number') {
-                throw new TypeError('match.index is undefined.');
+                throw new TypeError('match.index is undefined');
             }
 
             const coordinates: Coordinates = {
@@ -125,7 +125,7 @@ function second(data: string): void {
             // quiet the compiler due to a bug in TypeScript, see:
             // https://github.com/microsoft/TypeScript/issues/36788
             if (typeof column !== 'number') {
-                throw new TypeError('match.index is undefined.');
+                throw new TypeError('match.index is undefined');
             }
 
             const coordinates: Coordinates = {
