@@ -14,7 +14,7 @@ function first(data: string): void {
         const [needle, haystack] = line.split(': ')[1].split(' | ', 2)
             .map(numbers => numbers_parse(numbers));
 
-        const winners = haystack.reduce((accumulator, value, index) => {
+        const winners = haystack.reduce((accumulator, value) => {
             return accumulator + (needle.includes(value) ? 1 : 0);
         }, 0);
 
@@ -37,7 +37,7 @@ function second(data: string): void {
         const [needle, haystack] = lines[i].split(': ')[1].split(' | ', 2)
             .map(numbers => numbers_parse(numbers));
 
-        const winners = haystack.reduce((accumulator, value, index) => {
+        const winners = haystack.reduce((accumulator, value) => {
             return accumulator + (needle.includes(value) ? 1 : 0);
         }, 0);
 
@@ -46,7 +46,7 @@ function second(data: string): void {
         }
     }
 
-    result += copies.reduce((accumulator, value, index) => {
+    result += copies.reduce((accumulator, value) => {
         return accumulator + value;
     }, 0);
 
