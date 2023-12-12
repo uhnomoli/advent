@@ -132,7 +132,7 @@ function first(data: string): void {
 
     for (const seed of almanac.seeds) {
         result = seed_to_location(seed, almanac.maps)
-            .reduce((accumulator, value, index) => {
+            .reduce((accumulator, value) => {
                 return accumulator === -1 ?
                     value.source : Math.min(accumulator, value.source);
             }, result);
@@ -147,7 +147,7 @@ function second(data: string): void {
 
     for (const seed of almanac.seeds) {
         result = seed_to_location(seed, almanac.maps)
-            .reduce((accumulator, value, index) => {
+            .reduce((accumulator, value) => {
                 return accumulator === -1 ?
                     value.source : Math.min(accumulator, value.source);
             }, result);

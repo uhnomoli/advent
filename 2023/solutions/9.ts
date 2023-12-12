@@ -30,7 +30,7 @@ function history_parse(data: string): History {
         history.sequences.push(values);
 
         const sum = values
-            .reduce((accumulator, value, index) => accumulator + value);
+            .reduce((accumulator, value) => accumulator + value);
         if (sum === 0) { break; }
     }
 
