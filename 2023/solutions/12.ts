@@ -1,44 +1,45 @@
-interface Possibility {
-    index: number;
-    size: number;
-}
-
-interface Record {
+interface ConditionRecord {
     condition: string;
     groups: number[];
     springs: number[];
 }
 
+interface Possibility {
+    index: number;
+    size: number;
+}
 
-function product(...a: any[][]): any[][] {
+
+function product(record: ConditionRecord, ...a: any[][]): any[][] {
     return a.reduce((a, b) => {
         return a.flatMap(c => {
-            return b.map(d => [c, d].flat());
+            return b.reduce((d, e) => {
+                const previous = Array.isArray(c) ? c[c.length - 1] : c;
+                if (e.index > previous.index + previous.size) {
+                    const f = [c, e].flat();
+                    if (f.length !== record.groups.length) {
+                        d.push(f);
+                    } else if (possibilities_validate(f, record)) {
+                        d.push(f);
+                    }
+                }
+
+                return d;
+            }, []);
         });
     });
 }
 
 function possibilities_validate(
-        possibilities: Possibility[], record: Record): boolean {
-    const springs: Set<number> = new Set();
+        possibilities: Possibility[], record: ConditionRecord): boolean {
+    return record.springs.every(spring => {
+        return possibilities.some(possibility => {
+            const end = possibility.index + possibility.size;
+            const start = possibility.index;
 
-    for (let i = 0; i < possibilities.length; ++i) {
-        const b = possibilities[i];
-
-        for (const spring of record.springs) {
-            if (spring >= b.index && spring < b.index + b.size) {
-                springs.add(spring);
-            }
-        }
-
-        if (i === 0) { continue; }
-
-        const a = possibilities[i - 1];
-
-        if (a.index + a.size >= b.index) { return false; }
-    }
-
-    return springs.size === record.springs.length;
+            return spring >= start && spring < end;
+        });
+    });
 }
 
 function re_generate(groups: number[]): string {
@@ -49,14 +50,11 @@ function re_generate(groups: number[]): string {
     return `${re_groups}[.?]*$`;
 }
 
-function record_possibilities(record: Record): number {
+function record_possibilities(
+        record: ConditionRecord,
+        cache: Record<string, Possibility[]>): number {
     const possibilities: Possibility[][] = [];
     let start = 0;
-
-    //console.log('condition =>', record.condition);
-    //console.log('groups =>', record.groups);
-    //console.log('springs =>', record.springs);
-    //console.log('\n-------------------------\n');
 
     for (let i = 0; i < record.groups.length; i++) {
         const condition = record.condition;
@@ -83,44 +81,31 @@ function record_possibilities(record: Record): number {
         let re_possibility = new RegExp(
             `${re_prefix}[#?]{${target}}${re_generate(suffix)}`);
 
-        //console.log('re =>', re_possibility.toString());
-        //console.log('range =>', start, end);
-
         for (let j = start; j <= end; j++) {
             if (re_possibility.test(condition.slice(j))) {
                 possibility.push({
                     index: i === 0 ? j : j + 1,
                     size: target});
-
-                //console.log('  match =>', i === 0 ? j : j + 1, target);
             }
         }
 
         possibilities.push(possibility);
         start = possibility[0]?.index ?? 0;
         start += target;
-
-        //console.log('\n-------------------------\n');
     }
 
-    const wat = product(...possibilities)
-        .filter(possibility => possibilities_validate(possibility, record));
-
-    console.log('total =>', wat.length);
-    //console.log('\n=========================\n');
-
-    return wat.length;
+    return product(record, ...possibilities).length;
 }
 
-function records_parse(data: string, unfold: boolean): Record[] {
-    const records: Record[] = [];
+function records_parse(data: string, unfold: number): ConditionRecord[] {
+    const records: ConditionRecord[] = [];
 
     for (const record of data.split('\n')) {
         let [condition, groups] = record.split(' ', 2);
 
-        if (unfold) {
-            condition = Array(2).fill(condition).join('?');
-            groups = Array(2).fill(groups).join(',');
+        if (unfold > 1) {
+            condition = Array(unfold).fill(condition).join('?');
+            groups = Array(unfold).fill(groups).join(',');
         }
 
         records.push({
@@ -137,20 +122,22 @@ function records_parse(data: string, unfold: boolean): Record[] {
 
 
 function first(data: string): void {
+    const cache: Record<string, Possibility[]> = {};
     let result = 0;
 
-    for (const record of records_parse(data, false)) {
-        result += record_possibilities(record);
+    for (const record of records_parse(data, 0)) {
+        result += record_possibilities(record, cache);
     }
 
     console.log(`[.] Solution: ${result}`);
 }
 
 function second(data: string): void {
+    const cache: Record<string, Possibility[]> = {};
     let result = 0;
 
-    for (const record of records_parse(data, true)) {
-        result += record_possibilities(record);
+    for (const [i, record] of records_parse(data, 5).entries()) {
+        result += record_possibilities(record, cache);
     }
 
     console.log(`[.] Solution: ${result}`);
