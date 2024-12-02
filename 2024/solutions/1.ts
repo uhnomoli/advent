@@ -19,11 +19,8 @@ function second(left: number[], right: number[]): void {
 
         let count = 0;
         for (const b of right.values()) {
-            if (b === a) {
-                ++count;
-            } else if (b > a) {
-                break;
-            }
+            if (b > a) { break; }
+            if (b === a) { ++count; }
         }
 
         result += a * count;
