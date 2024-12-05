@@ -47,16 +47,13 @@ function neighbor_get(grid: Grid, cell: Cell, direction: Direction): Cell {
 
 function neighbors_get(
         grid: Grid, cell: Cell, direction: Direction | null): Map<Direction, Cell> {
-    const limit_east = grid.width - 1;
-    const limit_south = grid.height - 1;
-
     const directions: Map<Direction, boolean> = new Map([
          [Direction.N, cell.y !== 0],
-        [Direction.NE, cell.x !== limit_east && cell.y !== 0],
-         [Direction.E, cell.x !== limit_east],
-        [Direction.SE, cell.x !== limit_east && cell.y !== limit_south],
-         [Direction.S, cell.y !== limit_south],
-        [Direction.SW, cell.x !== 0 && cell.y !== limit_south],
+        [Direction.NE, cell.x !== grid.width && cell.y !== 0],
+         [Direction.E, cell.x !== grid.width],
+        [Direction.SE, cell.x !== grid.width && cell.y !== grid.height],
+         [Direction.S, cell.y !== grid.height],
+        [Direction.SW, cell.x !== 0 && cell.y !== grid.height],
          [Direction.W, cell.x !== 0],
         [Direction.NW, cell.x !== 0 && cell.y !== 0]]);
 
@@ -135,8 +132,8 @@ export function run(part: number, input: string): void {
                 .map((character, x) => ({value: character, x: x, y: y})));
         }
 
-        grid.height = grid.cells.length;
-        grid.width = grid.cells[0].length;
+        grid.height = grid.cells.length - 1;
+        grid.width = grid.cells[0].length - 1;
 
         if (part === 1) {
             first(grid);
