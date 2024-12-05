@@ -42,8 +42,8 @@ function option_path(value: string, previous: string): string {
 
 const program = new Command();
 program
-    .name('advent-of-code-2023')
-    .description('Solutions to challenges from Advent of Code 2023')
+    .name('advent-of-code-2024')
+    .description('Solutions to challenges from Advent of Code 2024')
     .option('-p, --part <number>', 'part to solve', option_part, 1)
     .requiredOption('-d, --day <number>', 'day to solve', option_day)
     .requiredOption(
