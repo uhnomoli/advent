@@ -22,6 +22,33 @@ interface Grid {
 }
 
 
+function cross_search(
+        grid: Grid, cell: Cell, first: string, second: string): number {
+    const directions: Direction[] = [
+        Direction.NE,
+        Direction.SE,
+        Direction.SW,
+        Direction.NW];
+
+    let corners: string = '';
+    for (const direction of directions) {
+        const corner = neighbor_get(grid, cell, direction);
+        if (corner === null) { return 0; }
+
+        corners += corner.value;
+    }
+
+    switch (corners) {
+        case `${first}${first}${second}${second}`:
+        case `${second}${first}${first}${second}`:
+        case `${second}${second}${first}${first}`:
+        case `${first}${second}${second}${first}`:
+            return 1;
+        default:
+            return 0;
+    }
+}
+
 function neighbor_get(
         grid: Grid, cell: Cell, direction: Direction): Cell | null {
     switch (direction) {
@@ -75,7 +102,7 @@ function neighbor_search(
     return neighbor_search(grid, neighbor, direction, word.slice(1));
 }
 
-function word_search(grid: Grid, start: Cell, word:string): number {
+function word_search(grid: Grid, start: Cell, word: string): number {
     let matches = 0;
 
     for (const direction of Object.values(Direction)) {
@@ -128,6 +155,38 @@ function first(data: string): void {
 
 function second(data: string): void {
     let result = 0;
+
+    const grid: Grid = {
+        cells: [],
+        height: 0,
+        width: 0};
+    const starts: Cell[] = [];
+
+    for (const [y, line] of data.split('\n').entries()) {
+        const row: Cell[] = [];
+
+        for (const [x, character] of line.split('').entries()) {
+            const cell: Cell = {
+                value: character,
+                x: x,
+                y: y};
+
+            if (character === 'A') {
+                starts.push(cell);
+            }
+
+            row.push(cell);
+        }
+
+        grid.cells.push(row);
+    }
+
+    grid.height = grid.cells.length - 1;
+    grid.width = grid.cells[0].length - 1;
+
+    for (const start of starts) {
+        result += cross_search(grid, start, 'M', 'S');
+    }
 
     console.log(`[.] Solution: ${result}`);
 }
