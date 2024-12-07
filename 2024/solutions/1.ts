@@ -34,11 +34,11 @@ export function run(part: number, input: string): void {
     Bun.file(input).text().then((data) => {
         data = data.trim();
 
-        let left: number[] = [];
-        let right: number[] = [];
+        const left: number[] = [];
+        const right: number[] = [];
 
         for (const line of data.split('\n')) {
-            let [a, b]: string[] = line.split('   ');
+            const [a, b]: string[] = line.split('   ');
 
             left.push(parseInt(a, 10));
             right.push(parseInt(b, 10));

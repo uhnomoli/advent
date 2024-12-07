@@ -1,9 +1,9 @@
 function report_check(report: number[], dampen: boolean = false): boolean {
-    let safe = report_safe(report);
+    const safe = report_safe(report);
     if (safe || !dampen) { return safe; }
 
     for (let i = 0; i < report.length; ++i) {
-        let dampened = [...report]
+        const dampened = [...report]
 
         dampened.splice(i, 1);
 
