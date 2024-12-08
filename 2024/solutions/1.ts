@@ -38,7 +38,7 @@ export function run(part: number, input: string): void {
         const right: number[] = [];
 
         for (const line of data.split('\n')) {
-            const [a, b]: string[] = line.split('   ');
+            const [a, b] = line.split('   ');
 
             left.push(parseInt(a, 10));
             right.push(parseInt(b, 10));
